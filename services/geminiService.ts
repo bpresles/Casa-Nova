@@ -94,7 +94,7 @@ export const generateRoadmap = async (
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
                 description:
-                  "Liste des actions détaillées à effectuer pour cette étape",
+                  "Liste des actions détaillées à effectuer pour cette étape.",
               },
               resources: {
                 type: Type.ARRAY,
