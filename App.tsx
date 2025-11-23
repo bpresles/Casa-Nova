@@ -26,7 +26,9 @@ const App: React.FC = () => {
   });
 
   // Specific state for services navigation
-  const [selectedServiceCategory, setSelectedServiceCategory] = useState<string | null>(null);
+  const [selectedServiceCategory, setSelectedServiceCategory] = useState<
+    string | null
+  >(null);
 
   // NEW: Specific state for Destination Info view to keep it independent from Roadmap
   const [infoViewDestination, setInfoViewDestination] = useState<string>("");
@@ -53,7 +55,16 @@ const App: React.FC = () => {
           />
         );
       case AppView.ROADMAP:
-        return <RoadmapGenerator profile={profile} setProfile={setProfile} roadmap={roadmap} setRoadmap={setRoadmap} onRoadmapGenerated={handleRoadmapGenerated} onFindPartner={handleFindPartner} />;
+        return (
+          <RoadmapGenerator
+            profile={profile}
+            setProfile={setProfile}
+            roadmap={roadmap}
+            setRoadmap={setRoadmap}
+            onRoadmapGenerated={handleRoadmapGenerated}
+            onFindPartner={handleFindPartner}
+          />
+        );
       case AppView.DESTINATION:
         return (
           <DestinationInfo
@@ -84,7 +95,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className='min-h-[100vh] bg-slate-50 relative'>
+    <div className="min-h-[100vh] bg-slate-50 relative flex flex-col">
       <Navigation
         currentView={currentView}
         onChangeView={(view) => {
@@ -98,14 +109,19 @@ const App: React.FC = () => {
           setCurrentView(view);
         }}
       />
-      <main className='min-h-96 py-6 px-4 sm:px-6 lg:px-8'>{renderContent()}</main>
+      <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8">
+        {renderContent()}
+      </main>
 
       <FloatingAssistant destinationContext={destinationContext} />
 
       {/* Footer */}
-      <footer className='bg-white border-t border-slate-200 mt-12'>
-        <div className='max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8'>
-          <p className='text-center text-sm text-slate-500'>&copy; 2024 Casa Nova. Startup Weekend Nantes. Fait avec ❤️ pour les citoyens du monde.</p>
+      <footer className="bg-white border-t border-slate-200 mt-12">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-slate-500">
+            &copy; 2024 Casa Nova. Startup Weekend Nantes. Fait avec ❤️ pour les
+            citoyens du monde.
+          </p>
         </div>
       </footer>
     </div>
