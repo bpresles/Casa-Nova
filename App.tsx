@@ -19,7 +19,7 @@ const App: React.FC = () => {
     originCountry: "France",
     destinationCountry: "",
     destinationCity: "",
-    moveDate: "",
+    moveDate: new Date().toISOString().split("T")[0],
     status: "Solo",
     purpose: "Travail",
     specificInterests: "",
