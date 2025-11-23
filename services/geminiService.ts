@@ -159,7 +159,7 @@ export const getDestinationInsights = async (country: string, city?: string, scr
             },
             rateOfLiving: {
               type: Type.NUMBER,
-              description: "une estimation du coût de la vie sur 5.",
+              description: "une estimation du coût de la vie sur 5, 1 sur 5 égal à très élevé coût de la vie.",
             },
             cultureVibe: {
               type: Type.STRING,
@@ -167,7 +167,7 @@ export const getDestinationInsights = async (country: string, city?: string, scr
             },
             rateOfCulture: {
               type: Type.NUMBER,
-              description: "une estimation de l'ambiance culturelle sur 5.",
+              description: "une estimation de l'ambiance culturelle sur 5, 1 sur 5 égal à une très grande culture.",
             },
             adminTips: {
               type: Type.STRING,
@@ -177,7 +177,7 @@ export const getDestinationInsights = async (country: string, city?: string, scr
             },
             rateOfAdmin: {
               type: Type.NUMBER,
-              description: "une estimation de la complexité administrative sur 5.",
+              description: "une estimation de la complexité administrative sur 5, 1 sur 5 égal à une très grosse complexité.",
             },
             safety: {
               type: Type.STRING,
@@ -185,7 +185,7 @@ export const getDestinationInsights = async (country: string, city?: string, scr
             },
             rateOfSafety: {
               type: Type.NUMBER,
-              description: "une estimation de la sécurité sur 5.",
+              description: "une estimation de la sécurité sur 5, 1 sur 5 égal à une très grosse insécurité.",
             },
           },
           required: ["overview", "costOfLiving", "cultureVibe", "adminTips", "safety"],
