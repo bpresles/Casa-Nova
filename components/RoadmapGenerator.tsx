@@ -64,7 +64,7 @@ const RoadmapGenerator: React.FC<RoadmapGeneratorProps> = ({ profile, setProfile
       specificInterests: interestsString,
     };
 
-    const { data: countries } = await axios.get<{ data: { name_fr: string }[] }>("http://localhost:5000/countries");
+    const { data: countries } = await axios.get<{ data: { name_fr: string }[] }>("http://localhost:5001/countries");
 
     const country = countries.data.find((c) => c.name_fr.toLowerCase() === finalProfile.destinationCountry.toLowerCase()) || finalProfile.destinationCountry;
 
