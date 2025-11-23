@@ -11,7 +11,10 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const generateRoadmap = async (profile: UserProfile, scrappedData: Record<string, string[]>): Promise<RoadmapStep[]> => {
+export const generateRoadmap = async (
+  profile: UserProfile,
+  scrappedData: Record<string, string[]>,
+): Promise<RoadmapStep[]> => {
   const ai = getAI();
 
   console.log(scrappedData);
@@ -78,13 +81,15 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
               description: { type: Type.STRING },
               timeline: {
                 type: Type.STRING,
-                description: "Quand faire cette action (ex: M-3, 2 semaines avant)",
+                description:
+                  "Quand faire cette action (ex: M-3, 2 semaines avant)",
               },
               priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
               subSteps: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
-                description: "Liste des actions détaillées à effectuer pour cette étape",
+                description:
+                  "Liste des actions détaillées à effectuer pour cette étape",
               },
               resources: {
                 type: Type.ARRAY,
@@ -93,11 +98,13 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
                   properties: {
                     title: {
                       type: Type.STRING,
-                      description: "Nom du site ou de la ressource (ex: Site officiel Visa)",
+                      description:
+                        "Nom du site ou de la ressource (ex: Site officiel Visa)",
                     },
                     url: {
                       type: Type.STRING,
-                      description: "URL réelle issue des données scrappées uniquement",
+                      description:
+                        "URL réelle issue des données scrappées uniquement",
                     },
                   },
                 },
@@ -105,11 +112,29 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
               },
               serviceCategory: {
                 type: Type.STRING,
-                enum: ["BANK", "VISA", "HOUSING", "INSURANCE", "TAX", "MOVING", "NONE"],
-                description: "Type de service partenaire utile pour cette étape",
+                enum: [
+                  "BANK",
+                  "VISA",
+                  "HOUSING",
+                  "INSURANCE",
+                  "TAX",
+                  "MOVING",
+                  "NONE",
+                ],
+                description:
+                  "Type de service partenaire utile pour cette étape",
               },
             },
-            required: ["category", "title", "description", "timeline", "priority", "subSteps", "resources", "serviceCategory"],
+            required: [
+              "category",
+              "title",
+              "description",
+              "timeline",
+              "priority",
+              "subSteps",
+              "resources",
+              "serviceCategory",
+            ],
           },
         },
       },
@@ -126,7 +151,11 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
   }
 };
 
-export const getDestinationInsights = async (country: string, city?: string, scrappedData?: Record<string, string[]>): Promise<DestinationInsight | null> => {
+export const getDestinationInsights = async (
+  country: string,
+  city?: string,
+  scrappedData?: Record<string, string[]>,
+): Promise<DestinationInsight | null> => {
   const ai = getAI();
 
   const target = city ? `${city}, ${country}` : country;
@@ -159,25 +188,31 @@ export const getDestinationInsights = async (country: string, city?: string, scr
             },
             rateOfLiving: {
               type: Type.NUMBER,
-              description: "une estimation du coût de la vie sur 5, 1 sur 5 égal à très élevé coût de la vie.",
+              description:
+                "une estimation du coût de la vie sur 5, 1 sur 5 égal à très élevé coût de la vie.",
             },
             cultureVibe: {
               type: Type.STRING,
-              description: "Ambiance culturelle et sociale. Cite quelques exemples de coutumes locales, gastronomiques, culturelles, artistiques du pays.",
+              description:
+                "Ambiance culturelle et sociale. Cite quelques exemples de coutumes locales, gastronomiques, culturelles, artistiques du pays.",
             },
             rateOfCulture: {
               type: Type.NUMBER,
-              description: "une estimation de l'ambiance culturelle sur 5, 1 sur 5 égal à une très grande culture.",
+              description:
+                "une estimation de l'ambiance culturelle sur 5, 1 sur 5 égal à une très grande culture.",
             },
             adminTips: {
               type: Type.STRING,
               description: `Conseil administratif clé spécifique au pays. N'hésite pas à mentionner des démarches spécifiques au pays, en incluant des liens HTML, à partir des données scrappées suivantes: ${
-                scrappedData ? JSON.stringify(scrappedData) : "Aucune donnée scrappée disponible."
+                scrappedData
+                  ? JSON.stringify(scrappedData)
+                  : "Aucune donnée scrappée disponible."
               }`,
             },
             rateOfAdmin: {
               type: Type.NUMBER,
-              description: "une estimation de la complexité administrative sur 5, 1 sur 5 égal à une très grosse complexité.",
+              description:
+                "une estimation de la complexité administrative sur 5, 1 sur 5 égal à une très grosse complexité.",
             },
             safety: {
               type: Type.STRING,
@@ -185,10 +220,17 @@ export const getDestinationInsights = async (country: string, city?: string, scr
             },
             rateOfSafety: {
               type: Type.NUMBER,
-              description: "une estimation de la sécurité sur 5, 1 sur 5 égal à une très grosse insécurité.",
+              description:
+                "une estimation de la sécurité sur 5, 1 sur 5 égal à une très grosse insécurité.",
             },
           },
-          required: ["overview", "costOfLiving", "cultureVibe", "adminTips", "safety"],
+          required: [
+            "overview",
+            "costOfLiving",
+            "cultureVibe",
+            "adminTips",
+            "safety",
+          ],
         },
       },
     });
@@ -202,7 +244,10 @@ export const getDestinationInsights = async (country: string, city?: string, scr
   }
 };
 
-export const askAssistant = async (question: string, context: string): Promise<string> => {
+export const askAssistant = async (
+  question: string,
+  context: string,
+): Promise<string> => {
   const ai = getAI();
   const prompt = `
     Tu es un expert en expatriation bienveillant pour l'application Casa Nova.
@@ -211,8 +256,20 @@ export const askAssistant = async (question: string, context: string): Promise<s
     Question de l'utilisateur : "${question}"
 
     Réponds de manière concise, utile et encourageante (max 3 phrases).
-    Tu n'hésiteras pas à référencer des noms de rubriques du site Casa Nova lorsque.
+    Tu n'hésiteras pas à référencer des noms de rubriques du site Casa Nova lorsque nécessaire (à savoir Infos Destination, Services & Partenaires, Communauté)
+
+    Dans la rubrique "Infos Destination", tu peux retrouver des informations sur le coût de la vie, la culture, la sécurité et l'administratif pour chaque pays.
+    Dans la rubrique "Services & Partenaires", tu peux retrouver des services professionnels pour l'expatriation (visa, logement, banque, assurance, déménagement, fiscalité, etc.).
+    Dans la rubrique "Communauté", tu peux retrouver d'autres expatriés et des ambassadeurs déjà sur place qui pourront vous conseiller.
+
     Si tu n'as pas de réponse, tu indiqueras qu'un expert humain prendra le relais.
+
+    IMPORTANT : Réponds en texte brut uniquement, SANS AUCUN formatage Markdown.
+    - N'utilise PAS de ** pour le gras
+    - N'utilise PAS de * ou - pour les listes
+    - N'utilise PAS de # pour les titres
+    - N'utilise PAS de \`code\` ou \`\`\`blocs de code\`\`\`
+    - Écris en phrases simples et naturelles comme dans une conversation normale.
   `;
 
   try {
@@ -220,7 +277,10 @@ export const askAssistant = async (question: string, context: string): Promise<s
       model: "gemini-2.5-flash",
       contents: prompt,
     });
-    return response.text || "Désolé, je n'ai pas pu traiter votre demande pour le moment.";
+    return (
+      response.text ||
+      "Désolé, je n'ai pas pu traiter votre demande pour le moment."
+    );
   } catch (error) {
     return "Une erreur est survenue lors de la communication avec l'assistant.";
   }
