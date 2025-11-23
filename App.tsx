@@ -84,7 +84,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className='min-h-screen bg-slate-50 relative'>
+    <div className='min-h-[100vh] bg-slate-50 relative'>
       <Navigation
         currentView={currentView}
         onChangeView={(view) => {
@@ -98,7 +98,7 @@ const App: React.FC = () => {
           setCurrentView(view);
         }}
       />
-      <main className='py-6 px-4 sm:px-6 lg:px-8'>{renderContent()}</main>
+      <main className='min-h-96 py-6 px-4 sm:px-6 lg:px-8'>{renderContent()}</main>
 
       <FloatingAssistant destinationContext={destinationContext} />
 

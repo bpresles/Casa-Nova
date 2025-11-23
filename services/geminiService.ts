@@ -1,10 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import {
-  ConsultantResponse,
-  DestinationInsight,
-  RoadmapStep,
-  UserProfile,
-} from "../types";
+import { ConsultantResponse, DestinationInsight, RoadmapStep, UserProfile } from "../types";
 
 // Helper to get AI instance safely
 const getAI = () => {
@@ -16,10 +11,7 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const generateRoadmap = async (
-  profile: UserProfile,
-  scrappedData: Record<string, string[]>,
-): Promise<RoadmapStep[]> => {
+export const generateRoadmap = async (profile: UserProfile, scrappedData: Record<string, string[]>): Promise<RoadmapStep[]> => {
   const ai = getAI();
 
   console.log(scrappedData);
@@ -45,6 +37,9 @@ export const generateRoadmap = async (
     - Le logement: ${scrappedData.housing?.join(", ") || "Aucune donnée logement disponible."}
     - L'assurance santé: ${scrappedData.healthcare?.join(", ") || "Aucune donnée santé disponible."}
     - La banque: ${scrappedData.banking?.join(", ") || "Aucune donnée bancaire disponible."}
+    - La communication: ${scrappedData.communication?.join(", ") || "Aucune donnée communication disponible."}
+    - Le transport: ${scrappedData.transport?.join(", ") || "Aucune donnée transport disponible."}
+    - La langue: ${scrappedData.language?.join(", ") || "Aucune donnée langue disponible."}
 
     --- CONSIGNES DE GÉNÉRATION ---
     Agis comme un consultant expert en relocation. Ta mission est de fournir un plan d'action étape par étape.
@@ -83,15 +78,13 @@ export const generateRoadmap = async (
               description: { type: Type.STRING },
               timeline: {
                 type: Type.STRING,
-                description:
-                  "Quand faire cette action (ex: M-3, 2 semaines avant)",
+                description: "Quand faire cette action (ex: M-3, 2 semaines avant)",
               },
               priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
               subSteps: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
-                description:
-                  "Liste des actions détaillées à effectuer pour cette étape",
+                description: "Liste des actions détaillées à effectuer pour cette étape",
               },
               resources: {
                 type: Type.ARRAY,
@@ -100,13 +93,11 @@ export const generateRoadmap = async (
                   properties: {
                     title: {
                       type: Type.STRING,
-                      description:
-                        "Nom du site ou de la ressource (ex: Site officiel Visa)",
+                      description: "Nom du site ou de la ressource (ex: Site officiel Visa)",
                     },
                     url: {
                       type: Type.STRING,
-                      description:
-                        "URL réelle issue des données scrappées uniquement",
+                      description: "URL réelle issue des données scrappées uniquement",
                     },
                   },
                 },
@@ -114,29 +105,11 @@ export const generateRoadmap = async (
               },
               serviceCategory: {
                 type: Type.STRING,
-                enum: [
-                  "BANK",
-                  "VISA",
-                  "HOUSING",
-                  "INSURANCE",
-                  "TAX",
-                  "MOVING",
-                  "NONE",
-                ],
-                description:
-                  "Type de service partenaire utile pour cette étape",
+                enum: ["BANK", "VISA", "HOUSING", "INSURANCE", "TAX", "MOVING", "NONE"],
+                description: "Type de service partenaire utile pour cette étape",
               },
             },
-            required: [
-              "category",
-              "title",
-              "description",
-              "timeline",
-              "priority",
-              "subSteps",
-              "resources",
-              "serviceCategory",
-            ],
+            required: ["category", "title", "description", "timeline", "priority", "subSteps", "resources", "serviceCategory"],
           },
         },
       },
@@ -153,10 +126,7 @@ export const generateRoadmap = async (
   }
 };
 
-export const getDestinationInsights = async (
-  country: string,
-  city?: string,
-): Promise<DestinationInsight | null> => {
+export const getDestinationInsights = async (country: string, city?: string): Promise<DestinationInsight | null> => {
   const ai = getAI();
 
   const target = city ? `${city}, ${country}` : country;
@@ -177,8 +147,7 @@ export const getDestinationInsights = async (
             },
             costOfLiving: {
               type: Type.STRING,
-              description:
-                "Estimation du coût de la vie par rapport à la France",
+              description: "Estimation du coût de la vie par rapport à la France",
             },
             cultureVibe: {
               type: Type.STRING,
@@ -193,13 +162,7 @@ export const getDestinationInsights = async (
               description: "Niveau de sécurité et conseils",
             },
           },
-          required: [
-            "overview",
-            "costOfLiving",
-            "cultureVibe",
-            "adminTips",
-            "safety",
-          ],
+          required: ["overview", "costOfLiving", "cultureVibe", "adminTips", "safety"],
         },
       },
     });
@@ -213,10 +176,7 @@ export const getDestinationInsights = async (
   }
 };
 
-export const askAssistant = async (
-  question: string,
-  context: string,
-): Promise<string> => {
+export const askAssistant = async (question: string, context: string): Promise<string> => {
   const ai = getAI();
   const prompt = `
     Tu es un expert en expatriation bienveillant pour l'application Casa Nova.
@@ -232,20 +192,14 @@ export const askAssistant = async (
       model: "gemini-2.5-flash",
       contents: prompt,
     });
-    return (
-      response.text ||
-      "Désolé, je n'ai pas pu traiter votre demande pour le moment."
-    );
+    return response.text || "Désolé, je n'ai pas pu traiter votre demande pour le moment.";
   } catch (error) {
     return "Une erreur est survenue lors de la communication avec l'assistant.";
   }
 };
 
 // DEPRECATED: Kept only for interface compatibility if needed elsewhere, but logic replaced by direct form submission
-export const consultantChat = async (
-  history: { role: "user" | "model"; text: string }[],
-  currentProfile: UserProfile,
-): Promise<ConsultantResponse> => {
+export const consultantChat = async (history: { role: "user" | "model"; text: string }[], currentProfile: UserProfile): Promise<ConsultantResponse> => {
   // Placeholder implementation as we moved to form wizard
   return {
     message: "Le système de chat a été remplacé par le formulaire.",
