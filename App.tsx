@@ -119,7 +119,7 @@ const App: React.FC = () => {
       <footer className="bg-white border-t border-slate-200 mt-12">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-slate-500">
-            &copy; 2024 Casa Nova. Startup Weekend Nantes. Fait avec ❤️ pour les
+            &copy; 2025 Casa Nova. Startup Weekend Nantes. Fait avec ❤️ pour les
             citoyens du monde.
           </p>
         </div>
