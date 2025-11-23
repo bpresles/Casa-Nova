@@ -1,5 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { ConsultantResponse, DestinationInsight, RoadmapStep, UserProfile } from "../types";
+import {
+  ConsultantResponse,
+  DestinationInsight,
+  RoadmapStep,
+  UserProfile,
+} from "../types";
 
 // Helper to get AI instance safely
 const getAI = () => {
@@ -11,7 +16,10 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const generateRoadmap = async (profile: UserProfile, scrappedData: Record<string, string[]>): Promise<RoadmapStep[]> => {
+export const generateRoadmap = async (
+  profile: UserProfile,
+  scrappedData: Record<string, string[]>,
+): Promise<RoadmapStep[]> => {
   const ai = getAI();
 
   console.log(scrappedData);
@@ -78,13 +86,15 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
               description: { type: Type.STRING },
               timeline: {
                 type: Type.STRING,
-                description: "Quand faire cette action (ex: M-3, 2 semaines avant)",
+                description:
+                  "Quand faire cette action (ex: M-3, 2 semaines avant)",
               },
               priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
               subSteps: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
-                description: "Liste des actions détaillées à effectuer pour cette étape",
+                description:
+                  "Liste des actions détaillées à effectuer pour cette étape",
               },
               resources: {
                 type: Type.ARRAY,
@@ -93,11 +103,13 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
                   properties: {
                     title: {
                       type: Type.STRING,
-                      description: "Nom du site ou de la ressource (ex: Site officiel Visa)",
+                      description:
+                        "Nom du site ou de la ressource (ex: Site officiel Visa)",
                     },
                     url: {
                       type: Type.STRING,
-                      description: "URL réelle issue des données scrappées uniquement",
+                      description:
+                        "URL réelle issue des données scrappées uniquement",
                     },
                   },
                 },
@@ -105,11 +117,29 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
               },
               serviceCategory: {
                 type: Type.STRING,
-                enum: ["BANK", "VISA", "HOUSING", "INSURANCE", "TAX", "MOVING", "NONE"],
-                description: "Type de service partenaire utile pour cette étape",
+                enum: [
+                  "BANK",
+                  "VISA",
+                  "HOUSING",
+                  "INSURANCE",
+                  "TAX",
+                  "MOVING",
+                  "NONE",
+                ],
+                description:
+                  "Type de service partenaire utile pour cette étape",
               },
             },
-            required: ["category", "title", "description", "timeline", "priority", "subSteps", "resources", "serviceCategory"],
+            required: [
+              "category",
+              "title",
+              "description",
+              "timeline",
+              "priority",
+              "subSteps",
+              "resources",
+              "serviceCategory",
+            ],
           },
         },
       },
@@ -126,11 +156,23 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
   }
 };
 
-export const getDestinationInsights = async (country: string, city?: string): Promise<DestinationInsight | null> => {
+export const getDestinationInsights = async (
+  country: string,
+  city?: string,
+  scrappedData?: Record<string, string[]>,
+): Promise<DestinationInsight | null> => {
   const ai = getAI();
 
   const target = city ? `${city}, ${country}` : country;
-  const prompt = `Donne-moi des informations pratiques et culturelles pour un expatrié s'installant à ${target}.`;
+  const prompt = `
+    Donne-moi des informations pratiques et culturelles pour un expatrié s'installant à ${target}.
+    Tu fourniras des informations concises et utiles dans les catégories suivantes :
+    1. Aperçu général : Bref résumé de la destination.
+    2. Coût de la vie : Estimation du coût de la vie par rapport à la France.
+    3. Culture et mode de vie : Points clés sur la culture locale et le mode de vie.
+    4. Conseils administratifs : Un conseil administratif clé spécifique au pays.
+    5. Sécurité : Niveau de sécurité et conseils pour les expatriés.
+  `;
 
   try {
     const response = await ai.models.generateContent({
@@ -143,26 +185,33 @@ export const getDestinationInsights = async (country: string, city?: string): Pr
           properties: {
             overview: {
               type: Type.STRING,
-              description: "Bref résumé de la destination",
+              description: `Bref résumé de la destination avec une image de fond qui doit absolument correspondre à une image de ville emblématique de ${country}.`,
             },
             costOfLiving: {
               type: Type.STRING,
-              description: "Estimation du coût de la vie par rapport à la France",
+              description: "Estimation du coût de la vie du pays.",
             },
             cultureVibe: {
               type: Type.STRING,
-              description: "Ambiance culturelle et sociale",
+              description:
+                "Ambiance culturelle et sociale. Cite quelques exemples de coutumes locales, gastronomiques, culturelles, artistiques du pays.",
             },
             adminTips: {
               type: Type.STRING,
-              description: "Conseil administratif clé spécifique au pays",
+              description: `Conseil administratif clé spécifique au pays. N'hésite pas à mentionner des démarches spécifiques au pays, en incluant des liens HTML, à partir des données scrappées suivantes: ${scrappedData ? JSON.stringify(scrappedData) : "Aucune donnée scrappée disponible."}`,
             },
             safety: {
               type: Type.STRING,
               description: "Niveau de sécurité et conseils",
             },
           },
-          required: ["overview", "costOfLiving", "cultureVibe", "adminTips", "safety"],
+          required: [
+            "overview",
+            "costOfLiving",
+            "cultureVibe",
+            "adminTips",
+            "safety",
+          ],
         },
       },
     });
@@ -176,7 +225,10 @@ export const getDestinationInsights = async (country: string, city?: string): Pr
   }
 };
 
-export const askAssistant = async (question: string, context: string): Promise<string> => {
+export const askAssistant = async (
+  question: string,
+  context: string,
+): Promise<string> => {
   const ai = getAI();
   const prompt = `
     Tu es un expert en expatriation bienveillant pour l'application Casa Nova.
@@ -185,6 +237,8 @@ export const askAssistant = async (question: string, context: string): Promise<s
     Question de l'utilisateur : "${question}"
 
     Réponds de manière concise, utile et encourageante (max 3 phrases).
+    Tu n'hésiteras pas à référencer des noms de rubriques du site Casa Nova lorsque.
+    Si tu n'as pas de réponse, tu indiqueras qu'un expert humain prendra le relais.
   `;
 
   try {
@@ -192,18 +246,11 @@ export const askAssistant = async (question: string, context: string): Promise<s
       model: "gemini-2.5-flash",
       contents: prompt,
     });
-    return response.text || "Désolé, je n'ai pas pu traiter votre demande pour le moment.";
+    return (
+      response.text ||
+      "Désolé, je n'ai pas pu traiter votre demande pour le moment."
+    );
   } catch (error) {
     return "Une erreur est survenue lors de la communication avec l'assistant.";
   }
-};
-
-// DEPRECATED: Kept only for interface compatibility if needed elsewhere, but logic replaced by direct form submission
-export const consultantChat = async (history: { role: "user" | "model"; text: string }[], currentProfile: UserProfile): Promise<ConsultantResponse> => {
-  // Placeholder implementation as we moved to form wizard
-  return {
-    message: "Le système de chat a été remplacé par le formulaire.",
-    extractedProfile: currentProfile,
-    isReadyToGenerate: false,
-  };
 };
