@@ -21,14 +21,7 @@ export interface RoadmapStep {
   subStepsCompleted?: boolean[]; // État d'avancement de chaque sous-étape
   resources?: RoadmapResource[]; // Liens officiels
   isCompleted?: boolean; // État d'avancement
-  serviceCategory?:
-    | "BANK"
-    | "VISA"
-    | "HOUSING"
-    | "INSURANCE"
-    | "TAX"
-    | "MOVING"
-    | "NONE"; // Pour lier aux partenaires
+  serviceCategory?: "BANK" | "VISA" | "HOUSING" | "INSURANCE" | "TAX" | "MOVING" | "NONE"; // Pour lier aux partenaires
 }
 
 export interface UserProfile {
@@ -47,6 +40,10 @@ export interface DestinationInsight {
   cultureVibe: string;
   adminTips: string;
   safety: string;
+  rateOfLiving: number; // Rating de 1 à 5 pour le coût de la vie
+  rateOfCulture: number; // Rating de 1 à 5 pour la culture
+  rateOfSafety: number; // Rating de 1 à 5 pour la sécurité
+  rateOfAdmin: number; // Rating de 1 à 5 pour les démarches administratives
 }
 
 export interface CommunityGroup {
