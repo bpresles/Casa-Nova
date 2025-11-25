@@ -17,7 +17,6 @@ export default defineConfig(({ mode }) => {
     define: {
       "process.env.VITE_API_URL": JSON.stringify(env.VITE_API_URL),
       "process.env.VITE_API_BASE": JSON.stringify(env.VITE_API_BASE),
-      "process.env.VITE_GEMINI_API_KEY": JSON.stringify(env.VITE_GEMINI_API_KEY),
     },
     resolve: {
       alias: {

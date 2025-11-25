@@ -1,21 +1,9 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import { GEMINI_API_KEY } from "../constants/api.constants";
+import { Type } from "@google/genai";
+import axios from "axios";
+import { CASANOVA_API_URL } from "../constants/api.constants";
 import { DestinationInsight, RoadmapStep, UserProfile } from "../types";
 
-// Helper to get AI instance safely
-const getAI = () => {
-  if (!GEMINI_API_KEY) {
-    console.error("API Key not found");
-    throw new Error("API Key is missing");
-  }
-  return new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-};
-
 export const generateRoadmap = async (profile: UserProfile, scrappedData: Record<string, string[]>): Promise<RoadmapStep[]> => {
-  const ai = getAI();
-
-  console.log(scrappedData);
-
   const prompt = `
     Génère une roadmap d'expatriation très détaillée et chronologique pour le profil suivant :
 
@@ -59,67 +47,68 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
     Format JSON attendu : Array<RoadmapStep>
   `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              category: {
-                type: Type.STRING,
-                description: "Catégorie courte (ex: Admin, Logement, Santé)",
-              },
-              title: { type: Type.STRING },
-              description: { type: Type.STRING },
-              timeline: {
-                type: Type.STRING,
-                description: "Quand faire cette action (ex: M-3, 2 semaines avant)",
-              },
-              priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
-              subSteps: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-                description: "Liste des actions détaillées à effectuer pour cette étape",
-              },
-              resources: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    title: {
-                      type: Type.STRING,
-                      description: "Nom du site ou de la ressource (ex: Site officiel Visa)",
-                    },
-                    url: {
-                      type: Type.STRING,
-                      description: "URL réelle issue des données scrappées uniquement",
-                    },
-                  },
+  const config = {
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          category: {
+            type: Type.STRING,
+            description: "Catégorie courte (ex: Admin, Logement, Santé)",
+          },
+          title: { type: Type.STRING },
+          description: { type: Type.STRING },
+          timeline: {
+            type: Type.STRING,
+            description: "Quand faire cette action (ex: M-3, 2 semaines avant)",
+          },
+          priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
+          subSteps: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "Liste des actions détaillées à effectuer pour cette étape",
+          },
+          resources: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: {
+                  type: Type.STRING,
+                  description: "Nom du site ou de la ressource (ex: Site officiel Visa)",
                 },
-                description: "Liens vers des sites officiels ou formulaires",
-              },
-              serviceCategory: {
-                type: Type.STRING,
-                enum: ["BANK", "VISA", "HOUSING", "INSURANCE", "TAX", "MOVING", "NONE"],
-                description: "Type de service partenaire utile pour cette étape",
+                url: {
+                  type: Type.STRING,
+                  description: "URL réelle issue des données scrappées uniquement",
+                },
               },
             },
-            required: ["category", "title", "description", "timeline", "priority", "subSteps", "resources", "serviceCategory"],
+            description: "Liens vers des sites officiels ou formulaires",
+          },
+          serviceCategory: {
+            type: Type.STRING,
+            enum: ["BANK", "VISA", "HOUSING", "INSURANCE", "TAX", "MOVING", "NONE"],
+            description: "Type de service partenaire utile pour cette étape",
           },
         },
+        required: ["category", "title", "description", "timeline", "priority", "subSteps", "resources", "serviceCategory"],
+      },
+    },
+  };
+
+  try {
+    const { data: response } = await axios.post<RoadmapStep[]>(`${CASANOVA_API_URL}/gemini`, {
+      parameters: {
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config,
       },
     });
 
-    const text = response.text;
-    if (!text) return [];
-    // Add isCompleted: false by default
-    const steps = JSON.parse(text) as RoadmapStep[];
-    return steps.map((s) => ({ ...s, isCompleted: false }));
+    if (!response) return [];
+    return response.map((s) => ({ ...s, isCompleted: false }));
   } catch (error) {
     console.error("Error generating roadmap:", error);
     return [];
@@ -127,8 +116,6 @@ export const generateRoadmap = async (profile: UserProfile, scrappedData: Record
 };
 
 export const getDestinationInsights = async (country: string, city?: string, scrappedData?: Record<string, string[]>): Promise<DestinationInsight | null> => {
-  const ai = getAI();
-
   const target = city ? `${city}, ${country}` : country;
   const prompt = `
     Donne-moi des informations pratiques et culturelles pour un expatrié s'installant à ${target}.
@@ -140,62 +127,65 @@ export const getDestinationInsights = async (country: string, city?: string, scr
     5. Sécurité : Niveau de sécurité et conseils pour les expatriés.
   `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            overview: {
-              type: Type.STRING,
-              description: `Bref résumé de la destination avec une image de fond qui doit absolument correspondre à une image de ville emblématique de ${country}.`,
-            },
-            costOfLiving: {
-              type: Type.STRING,
-              description: "Estimation du coût de la vie du pays.",
-            },
-            rateOfLiving: {
-              type: Type.NUMBER,
-              description: "une estimation du coût de la vie sur 5, 1 sur 5 égal à très élevé coût de la vie.",
-            },
-            cultureVibe: {
-              type: Type.STRING,
-              description: "Ambiance culturelle et sociale. Cite quelques exemples de coutumes locales, gastronomiques, culturelles, artistiques du pays.",
-            },
-            rateOfCulture: {
-              type: Type.NUMBER,
-              description: "une estimation de l'ambiance culturelle sur 5, 1 sur 5 égal à une très grande culture.",
-            },
-            adminTips: {
-              type: Type.STRING,
-              description: `Conseil administratif clé spécifique au pays. N'hésite pas à mentionner des démarches spécifiques au pays, en incluant des liens HTML, à partir des données scrappées suivantes: ${
-                scrappedData ? JSON.stringify(scrappedData) : "Aucune donnée scrappée disponible."
-              }`,
-            },
-            rateOfAdmin: {
-              type: Type.NUMBER,
-              description: "une estimation de la complexité administrative sur 5, 1 sur 5 égal à une très grosse complexité.",
-            },
-            safety: {
-              type: Type.STRING,
-              description: "Niveau de sécurité et conseils",
-            },
-            rateOfSafety: {
-              type: Type.NUMBER,
-              description: "une estimation de la sécurité sur 5, 1 sur 5 égal à une très grosse insécurité.",
-            },
-          },
-          required: ["overview", "costOfLiving", "cultureVibe", "adminTips", "safety"],
+  const config = {
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: Type.OBJECT,
+      properties: {
+        overview: {
+          type: Type.STRING,
+          description: `Bref résumé de la destination avec une image de fond qui doit absolument correspondre à une image de ville emblématique de ${country}.`,
         },
+        costOfLiving: {
+          type: Type.STRING,
+          description: "Estimation du coût de la vie du pays.",
+        },
+        rateOfLiving: {
+          type: Type.NUMBER,
+          description: "une estimation du coût de la vie sur 5, 1 sur 5 égal à très élevé coût de la vie.",
+        },
+        cultureVibe: {
+          type: Type.STRING,
+          description: "Ambiance culturelle et sociale. Cite quelques exemples de coutumes locales, gastronomiques, culturelles, artistiques du pays.",
+        },
+        rateOfCulture: {
+          type: Type.NUMBER,
+          description: "une estimation de l'ambiance culturelle sur 5, 1 sur 5 égal à une très grande culture.",
+        },
+        adminTips: {
+          type: Type.STRING,
+          description: `Conseil administratif clé spécifique au pays. N'hésite pas à mentionner des démarches spécifiques au pays, en incluant des liens HTML, à partir des données scrappées suivantes: ${
+            scrappedData ? JSON.stringify(scrappedData) : "Aucune donnée scrappée disponible."
+          }`,
+        },
+        rateOfAdmin: {
+          type: Type.NUMBER,
+          description: "une estimation de la complexité administrative sur 5, 1 sur 5 égal à une très grosse complexité.",
+        },
+        safety: {
+          type: Type.STRING,
+          description: "Niveau de sécurité et conseils",
+        },
+        rateOfSafety: {
+          type: Type.NUMBER,
+          description: "une estimation de la sécurité sur 5, 1 sur 5 égal à une très grosse insécurité.",
+        },
+      },
+      required: ["overview", "costOfLiving", "cultureVibe", "adminTips", "safety"],
+    },
+  };
+
+  try {
+    const { data: response } = await axios.post<DestinationInsight>(`${CASANOVA_API_URL}/gemini`, {
+      parameters: {
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config,
       },
     });
 
-    const text = response.text;
-    if (!text) return null;
-    return JSON.parse(text) as DestinationInsight;
+    if (!response) return null;
+    return response as DestinationInsight;
   } catch (error) {
     console.error("Error fetching destination insights:", error);
     return null;
@@ -203,7 +193,6 @@ export const getDestinationInsights = async (country: string, city?: string, scr
 };
 
 export const askAssistant = async (question: string, context: string): Promise<string> => {
-  const ai = getAI();
   const prompt = `
     Tu es un expert en expatriation bienveillant pour l'application Casa Nova.
     Contexte actuel de l'utilisateur : ${context}
@@ -228,11 +217,16 @@ export const askAssistant = async (question: string, context: string): Promise<s
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const { data: response } = await axios.post<DestinationInsight>(`${CASANOVA_API_URL}/gemini`, {
+      parameters: {
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      },
     });
-    return response.text || "Désolé, je n'ai pas pu traiter votre demande pour le moment.";
+
+    if (!response) return "Désolé, je n'ai pas pu traiter votre demande pour le moment.";
+
+    return JSON.stringify(response);
   } catch (error) {
     return "Une erreur est survenue lors de la communication avec l'assistant.";
   }
