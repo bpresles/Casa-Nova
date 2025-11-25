@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ArrowLeft, ArrowRight, Briefcase, Calendar, Check, ChevronDown, ChevronUp, ExternalLink, FileText, Heart, HelpCircle, Loader2, MapPin, Plane, Users } from "lucide-react";
 import React, { useState } from "react";
+import { CASANOVA_API_URL } from "../constants/api.constants";
 import { generateRoadmap } from "../services/geminiService";
 import { RoadmapStep, UserProfile } from "../types";
 
@@ -69,7 +70,7 @@ const RoadmapGenerator: React.FC<RoadmapGeneratorProps> = ({ profile, setProfile
 
     const { data: countries } = await axios.get<{
       data: { name_fr: string }[];
-    }>("http://localhost:5001/countries");
+    }>(`${CASANOVA_API_URL}/countries`);
 
     const country = countries.data.find((c) => c.name_fr.toLowerCase() === finalProfile.destinationCountry.toLowerCase()) || finalProfile.destinationCountry;
 
@@ -78,19 +79,19 @@ const RoadmapGenerator: React.FC<RoadmapGeneratorProps> = ({ profile, setProfile
     await Promise.all(
       selectedNeeds.map(async (need: NEED) => {
         if (need === VISA) {
-          const { data } = await axios.get(`http://localhost:5001/visa?country=${country.code}`);
+          const { data } = await axios.get(`${CASANOVA_API_URL}/visa?country=${country.code}`);
           scrappedData["visa"] = data.data.map((item: any) => item.source_url);
         } else if (need === HOUSING) {
-          const { data } = await axios.get(`http://localhost:5001/housing?country=${country.code}`);
+          const { data } = await axios.get(`${CASANOVA_API_URL}/housing?country=${country.code}`);
           scrappedData["housing"] = data.data.map((item: any) => item.source_url);
         } else if (need === HEALTHCARE) {
-          const { data } = await axios.get(`http://localhost:5001/healthcare?country=${country.code}`);
+          const { data } = await axios.get(`${CASANOVA_API_URL}/healthcare?country=${country.code}`);
           scrappedData["healthcare"] = data.data.map((item: any) => item.source_url);
         } else if (need === BANK_ACCOUNT) {
-          const { data } = await axios.get(`http://localhost:5001/banking?country=${country.code}`);
+          const { data } = await axios.get(`${CASANOVA_API_URL}/banking?country=${country.code}`);
           scrappedData["banking"] = data.data.map((item: any) => item.source_url);
         } else if (need === EMPLOYMENT) {
-          const { data } = await axios.get(`http://localhost:5001/job?country=${country.code}`);
+          const { data } = await axios.get(`${CASANOVA_API_URL}/job?country=${country.code}`);
           scrappedData["job"] = data.data.map((item: any) => item.source_url);
         }
       })

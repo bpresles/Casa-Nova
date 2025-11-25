@@ -2,6 +2,7 @@ import axios from "axios";
 import { Coins, FileText, Loader2, MapPin, PartyPopper, Shield, Star } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import ReactHtmlParser from "react-html-parser";
+import { CASANOVA_API_URL } from "../constants/api.constants";
 import { getDestinationInsights } from "../services/geminiService";
 import { DestinationInsight } from "../types";
 
@@ -66,21 +67,21 @@ const DestinationInfo: React.FC<DestinationInfoProps> = ({ destination, onSelect
       try {
         const { data: countries } = await axios.get<{
           data: { name_fr: string }[];
-        }>("http://localhost:5001/countries");
+        }>(`${CASANOVA_API_URL}/countries`);
 
         const country = countries.data.find((c) => c.name_fr.toLowerCase() === destination.toLowerCase()) || destination;
 
         const scrappedData = {};
 
-        const { data: visas } = await axios.get(`http://localhost:5001/visa?country=${country.code}`);
+        const { data: visas } = await axios.get(`${CASANOVA_API_URL}/visa?country=${country.code}`);
         scrappedData["visa"] = visas.data.map((item: any) => item.source_url);
-        const { data: housing } = await axios.get(`http://localhost:5001/housing?country=${country.code}`);
+        const { data: housing } = await axios.get(`${CASANOVA_API_URL}/housing?country=${country.code}`);
         scrappedData["housing"] = housing.data.map((item: any) => item.source_url);
-        const { data: healthcare } = await axios.get(`http://localhost:5001/healthcare?country=${country.code}`);
+        const { data: healthcare } = await axios.get(`${CASANOVA_API_URL}/healthcare?country=${country.code}`);
         scrappedData["healthcare"] = healthcare.data.map((item: any) => item.source_url);
-        const { data: banking } = await axios.get(`http://localhost:5001/banking?country=${country.code}`);
+        const { data: banking } = await axios.get(`${CASANOVA_API_URL}/banking?country=${country.code}`);
         scrappedData["banking"] = banking.data.map((item: any) => item.source_url);
-        const { data: job } = await axios.get(`http://localhost:5001/job?country=${country.code}`);
+        const { data: job } = await axios.get(`${CASANOVA_API_URL}/job?country=${country.code}`);
         scrappedData["job"] = job.data.map((item: any) => item.source_url);
         const data = await getDestinationInsights(destination, "", scrappedData);
         setInfo(data);

@@ -10,10 +10,14 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: "0.0.0.0",
     },
+    build: {
+      outDir: "client",
+    },
     plugins: [react(), tailwindcss()],
     define: {
-      "process.env.API_KEY": JSON.stringify(env.GEMINI_API_KEY),
-      "process.env.GEMINI_API_KEY": JSON.stringify(env.GEMINI_API_KEY),
+      "process.env.VITE_API_URL": JSON.stringify(env.VITE_API_URL),
+      "process.env.VITE_API_BASE": JSON.stringify(env.VITE_API_BASE),
+      "process.env.VITE_GEMINI_API_KEY": JSON.stringify(env.VITE_GEMINI_API_KEY),
     },
     resolve: {
       alias: {
